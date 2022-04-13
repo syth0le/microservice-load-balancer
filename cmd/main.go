@@ -9,21 +9,21 @@ import (
 
 type Server struct {
 	URL          *url.URL
-	AliveStatus  bool
+	IsAlive      bool
 	mux          sync.RWMutex
 	ReverseProxy *httputil.ReverseProxy
 }
 
-func (s *Server) IsAlive() (alive bool) {
+func (s *Server) GetAliveStatus() (alive bool) {
 	s.mux.RLock()
-	alive = s.AliveStatus
+	alive = s.IsAlive
 	s.mux.RUnlock()
 	return
 }
 
-func (s *Server) SetAlive(alive bool) {
+func (s *Server) SetAliveStatus(alive bool) {
 	s.mux.Lock()
-	s.AliveStatus = alive
+	s.IsAlive = alive
 	s.mux.Unlock()
 }
 
@@ -39,7 +39,7 @@ func (sp *ServerPool) NextIndex() int {
 func (sp *ServerPool) GetNextServer() *Server {
 	next := sp.NextIndex()
 	for idx, server := range sp.servers {
-		if server.IsAlive() {
+		if server.GetAliveStatus() {
 			if idx != next {
 				atomic.StoreUint64(&sp.currentServer, uint64(idx))
 			}
