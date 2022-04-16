@@ -3,6 +3,8 @@ package structures
 import (
 	"log"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"sync/atomic"
 )
 
@@ -47,5 +49,10 @@ func (sp *ServerPool) DoHealthCheck() {
 }
 
 func (sp *ServerPool) AddServer(server *Server) {
+	serverUrl, err := url.Parse(server.URL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	server.ReverseProxy = httputil.NewSingleHostReverseProxy(serverUrl)
 	sp.Servers = append(sp.Servers, server)
 }
