@@ -1,7 +1,9 @@
 package structures
 
 import (
+	"log"
 	"net/http/httputil"
+	"net/url"
 	"sync"
 )
 
@@ -24,4 +26,13 @@ func (s *Server) SetAliveStatus(alive bool) {
 	s.Mux.Lock()
 	s.IsAlive = alive
 	s.Mux.Unlock()
+}
+
+func (s *Server) AddReverseProxy() {
+	serverUrl, err := url.Parse(s.URL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(s.URL)
+	s.ReverseProxy = httputil.NewSingleHostReverseProxy(serverUrl)
 }

@@ -3,8 +3,6 @@ package structures
 import (
 	"log"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"sync/atomic"
 )
 
@@ -20,7 +18,7 @@ func (sp *ServerPool) NextIndex() int {
 func (sp *ServerPool) GetNextServer() *Server {
 	next := sp.NextIndex()
 	for idx, server := range sp.Servers {
-		if server.GetAliveStatus() {
+		if server.GetAliveStatus() { // TODO: проверять как то по-другому
 			if idx != next {
 				atomic.StoreUint64(&sp.CurrentServer, uint64(idx))
 			}
@@ -49,10 +47,5 @@ func (sp *ServerPool) DoHealthCheck() {
 }
 
 func (sp *ServerPool) AddServer(server *Server) {
-	serverUrl, err := url.Parse(server.URL)
-	if err != nil {
-		log.Fatal(err)
-	}
-	server.ReverseProxy = httputil.NewSingleHostReverseProxy(serverUrl)
 	sp.Servers = append(sp.Servers, server)
 }
