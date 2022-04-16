@@ -4,27 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/syth0le/microservice-load-balancer/config"
+	"github.com/syth0le/microservice-load-balancer/sources/structures"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"time"
 )
 
 var cfg config.Config
+var serverPool structures.ServerPool
 
 func doHealthCheck() {
-	for _, server := range cfg.Servers {
-		if true == server.GetAliveStatus() {
-			//a = 1
-		}
-		pingedURL, err := url.Parse(server.URL)
-		_ = pingedURL
-		if err != nil {
-			log.Fatal(err.Error())
-		} else {
-			server.SetAliveStatus(true)
-		}
+	for {
+		serverPool.DoHealthCheck()
 	}
 }
 

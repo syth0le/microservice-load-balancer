@@ -1,6 +1,8 @@
 package structures
 
 import (
+	"log"
+	"net/http"
 	"sync/atomic"
 )
 
@@ -24,4 +26,22 @@ func (sp *ServerPool) GetNextServer() *Server {
 		}
 	}
 	return nil
+}
+
+func (sp *ServerPool) DoHealthCheck() {
+	for _, server := range sp.servers {
+		if true == server.GetAliveStatus() {
+			//a = 1
+		}
+		//pingedURL, err := url.Parse(server.URL)
+		resp, err := http.Get(server.URL)
+
+		if err != nil {
+			//log.Fatal(err.Error())
+			log.Printf("SERVER CONNECTION REFUSED: %s - %d\n", server.URL, resp)
+		} else {
+			server.SetAliveStatus(true)
+			log.Printf("SERVER: %s is OK - %d\n", server.URL, resp.StatusCode)
+		}
+	}
 }
