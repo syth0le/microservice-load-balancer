@@ -9,19 +9,19 @@ type Server struct {
 	URL string `json:"url"`
 	//URL          *url.URL
 	IsAlive      bool
-	mux          sync.RWMutex
+	Mux          sync.RWMutex
 	ReverseProxy *httputil.ReverseProxy
 }
 
 func (s *Server) GetAliveStatus() (alive bool) {
-	s.mux.RLock()
+	s.Mux.RLock()
 	alive = s.IsAlive
-	s.mux.RUnlock()
+	s.Mux.RUnlock()
 	return
 }
 
 func (s *Server) SetAliveStatus(alive bool) {
-	s.mux.Lock()
+	s.Mux.Lock()
 	s.IsAlive = alive
-	s.mux.Unlock()
+	s.Mux.Unlock()
 }

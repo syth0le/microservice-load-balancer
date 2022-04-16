@@ -7,20 +7,20 @@ import (
 )
 
 type ServerPool struct {
-	servers       []*Server
-	currentServer uint64
+	Servers       []*Server
+	CurrentServer uint64
 }
 
 func (sp *ServerPool) NextIndex() int {
-	return int(atomic.AddUint64(&sp.currentServer, uint64(1)) % uint64(len(sp.servers)))
+	return int(atomic.AddUint64(&sp.CurrentServer, uint64(1)) % uint64(len(sp.Servers)))
 }
 
 func (sp *ServerPool) GetNextServer() *Server {
 	next := sp.NextIndex()
-	for idx, server := range sp.servers {
+	for idx, server := range sp.Servers {
 		if server.GetAliveStatus() {
 			if idx != next {
-				atomic.StoreUint64(&sp.currentServer, uint64(idx))
+				atomic.StoreUint64(&sp.CurrentServer, uint64(idx))
 			}
 			return server
 		}
@@ -29,19 +29,23 @@ func (sp *ServerPool) GetNextServer() *Server {
 }
 
 func (sp *ServerPool) DoHealthCheck() {
-	for _, server := range sp.servers {
-		if true == server.GetAliveStatus() {
-			//a = 1
-		}
-		//pingedURL, err := url.Parse(server.URL)
+	for _, server := range sp.Servers {
+		//if true == server.GetAliveStatus() {
+		//a = 1
+		//}
 		resp, err := http.Get(server.URL)
 
 		if err != nil {
-			//log.Fatal(err.Error())
-			log.Printf("SERVER CONNECTION REFUSED: %s - %d\n", server.URL, resp)
+			server.SetAliveStatus(false)
+			log.Printf(err.Error())
+			log.Printf("SERVER CONNECTION REFUSED: %s\n", server.URL)
 		} else {
 			server.SetAliveStatus(true)
 			log.Printf("SERVER: %s is OK - %d\n", server.URL, resp.StatusCode)
 		}
 	}
+}
+
+func (sp *ServerPool) AddServer(server *Server) {
+	sp.Servers = append(sp.Servers, server)
 }

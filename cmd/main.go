@@ -16,7 +16,18 @@ var serverPool structures.ServerPool
 
 func doHealthCheck() {
 	for {
-		serverPool.DoHealthCheck()
+		countdown := time.NewTicker(time.Minute)
+		select {
+		case <-countdown.C:
+			log.Println("Started Health Check")
+			serverPool.DoHealthCheck()
+			log.Println("Finished Health Check")
+		}
+	}
+}
+func createServerPool() {
+	for _, server := range cfg.Servers {
+		serverPool.AddServer(&server)
 	}
 }
 
@@ -28,6 +39,13 @@ func loadBalancing(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+
+	connection := serverPool.GetNextServer()
+	if connection != nil {
+		connection.ReverseProxy.ServeHTTP(w, r)
+		return
+	}
+
 }
 
 func main() {
@@ -45,6 +63,7 @@ func main() {
 		Handler: http.HandlerFunc(loadBalancing),
 	}
 
+	createServerPool()
 	go doHealthCheck()
 
 	if err := server.ListenAndServe(); err != nil {
