@@ -1,54 +1,37 @@
 package main
 
 import (
-	"net/http/httputil"
-	"net/url"
-	"sync"
-	"sync/atomic"
+	"encoding/json"
+	"fmt"
+	"github.com/syth0le/microservice-load-balancer/config"
+	"io/ioutil"
+	"log"
 )
 
-type Server struct {
-	URL          *url.URL
-	IsAlive      bool
-	mux          sync.RWMutex
-	ReverseProxy *httputil.ReverseProxy
-}
+var cfg config.Config
 
-func (s *Server) GetAliveStatus() (alive bool) {
-	s.mux.RLock()
-	alive = s.IsAlive
-	s.mux.RUnlock()
-	return
-}
-
-func (s *Server) SetAliveStatus(alive bool) {
-	s.mux.Lock()
-	s.IsAlive = alive
-	s.mux.Unlock()
-}
-
-type ServerPool struct {
-	servers       []*Server
-	currentServer uint64
-}
-
-func (sp *ServerPool) NextIndex() int {
-	return int(atomic.AddUint64(&sp.currentServer, uint64(1)) % uint64(len(sp.servers)))
-}
-
-func (sp *ServerPool) GetNextServer() *Server {
-	next := sp.NextIndex()
-	for idx, server := range sp.servers {
-		if server.GetAliveStatus() {
-			if idx != next {
-				atomic.StoreUint64(&sp.currentServer, uint64(idx))
-			}
-			return server
-		}
-	}
-	return nil
+func doHealthCheck() {
+	//for _, server := range config.Servers {
+	//if a := server.GetAliveStatus() {
+	//	a = 1
+	//}
+	//pingedURL, err := url.Parse(server.URL)
+	//if err != nil {
+	//	log.Fatal(err.Error())
+	//} else {
+	//	server.SetAliveStatus(true)
+	//}
+	//}
 }
 
 func main() {
-
+	cfgData, err := ioutil.ReadFile("./config/config.json")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	err = json.Unmarshal(cfgData, &cfg)
+	if err != nil {
+		return
+	}
+	fmt.Println(cfg)
 }

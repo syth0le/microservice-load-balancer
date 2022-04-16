@@ -1,9 +1,17 @@
 {
-  "proxy_port": 8080,
+  "proxy_port": "8080",
   "servers": [
-    "http://localhost:1234/",
-    "http://localhost:1235/",
-    "http://localhost:1236/",
-    "http://localhost:1237/"
+    {
+      "url": "http://localhost:8081/"
+    },
+    {
+      "url": "http://localhost:8082/"
+    },
+    {
+      "url": "http://localhost:8083/"
+    },
+    {
+      "url": "http://localhost:8084/"
+    }
   ]
 }
