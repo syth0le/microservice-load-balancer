@@ -6,3 +6,6 @@ type Config struct {
 	ProxyPort string              `json:"proxy_port"`
 	Servers   []structures.Server `json:"servers"`
 }
+
+var Cfg Config
+var ServerPool structures.ServerPool

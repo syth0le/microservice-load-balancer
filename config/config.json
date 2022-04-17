@@ -1,5 +1,5 @@
 {
-  "proxy_port": "8080",
+  "proxy_port": "8888",
   "servers": [
     {
       "url": "http://localhost:8081/"
