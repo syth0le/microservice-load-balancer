@@ -1,9 +1,8 @@
-package balancer
+package structures
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/syth0le/microservice-load-balancer/config"
 	"log"
 	"net/http"
 	"time"
@@ -26,7 +25,7 @@ func LoadBalancing(w http.ResponseWriter, r *http.Request) {
 	logString := fmt.Sprintf("[%s] %s - %s", local, r.RemoteAddr, r.RequestURI)
 	log.Println(logString)
 
-	connection := config.ServerPool.GetNextServer()
+	connection := ServPool.GetNextServer()
 	if connection != nil {
 		connection.ReverseProxy.ServeHTTP(w, r)
 		return

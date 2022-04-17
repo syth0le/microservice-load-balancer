@@ -2,8 +2,6 @@ package structures
 
 import (
 	"context"
-	"github.com/syth0le/microservice-load-balancer/config"
-	"github.com/syth0le/microservice-load-balancer/sources/balancer"
 	"log"
 	"net"
 	"net/http"
@@ -42,24 +40,22 @@ func (s *Server) AddReverseProxy() {
 	s.ReverseProxy = httputil.NewSingleHostReverseProxy(serverUrl)
 	s.ReverseProxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, e error) {
 		log.Printf("[%s] %s\n", serverUrl.Host, e.Error())
-		retries := balancer.GetRetryFromContext(request)
+		retries := GetRetryFromContext(request)
 		if retries < 3 {
 			select {
 			case <-time.After(10 * time.Millisecond):
-				ctx := context.WithValue(request.Context(), balancer.Retry, retries+1)
+				ctx := context.WithValue(request.Context(), Retry, retries+1)
 				s.ReverseProxy.ServeHTTP(writer, request.WithContext(ctx))
 			}
 			return
 		}
 
-		// after 3 retries, mark this backend as down
-		config.ServerPool.MarkBackendStatus(serverUrl, false)
+		ServPool.MarkBackendStatus(serverUrl, false)
 
-		// if the same request routing for few attempts with different backends, increase the count
-		attempts := balancer.GetAttemptsFromContext(request)
+		attempts := GetAttemptsFromContext(request)
 		log.Printf("%s(%s) Attempting retry %d\n", request.RemoteAddr, request.URL.Path, attempts)
-		ctx := context.WithValue(request.Context(), balancer.Attempts, attempts+1)
-		balancer.LoadBalancing(writer, request.WithContext(ctx))
+		ctx := context.WithValue(request.Context(), Attempts, attempts+1)
+		LoadBalancing(writer, request.WithContext(ctx))
 	}
 }
 

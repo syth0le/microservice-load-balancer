@@ -3,8 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/syth0le/microservice-load-balancer/config"
-	"github.com/syth0le/microservice-load-balancer/sources/balancer"
 	"github.com/syth0le/microservice-load-balancer/sources/structures"
 	"github.com/syth0le/microservice-load-balancer/sources/utils"
 	"io/ioutil"
@@ -12,14 +10,12 @@ import (
 	"net/http"
 )
 
-var ServerPool structures.ServerPool
-
 func main() {
 	cfgData, err := ioutil.ReadFile("./config/config.json")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	err = json.Unmarshal(cfgData, &config.Cfg)
+	err = json.Unmarshal(cfgData, &structures.Cfg)
 	if err != nil {
 		return
 	}
@@ -27,8 +23,8 @@ func main() {
 	utils.CreateServerPool()
 
 	server := http.Server{
-		Addr:    fmt.Sprintf(":%s", config.Cfg.ProxyPort),
-		Handler: http.HandlerFunc(balancer.LoadBalancing),
+		Addr:    fmt.Sprintf(":%s", structures.Cfg.ProxyPort),
+		Handler: http.HandlerFunc(structures.LoadBalancing),
 	}
 
 	go utils.DoHealthCheck()
