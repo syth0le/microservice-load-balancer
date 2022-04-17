@@ -2,7 +2,7 @@ package structures
 
 import (
 	"log"
-	"net/http"
+	"net/url"
 	"sync/atomic"
 )
 
@@ -30,22 +30,27 @@ func (sp *ServerPool) GetNextServer() *Server {
 
 func (sp *ServerPool) DoHealthCheck() {
 	for _, server := range sp.Servers {
-		//if true == server.GetAliveStatus() {
-		//a = 1
-		//}
-		resp, err := http.Get(server.URL)
+		//resp, err := http.Get(server.URL)
+		status := CheckServerAvailability(server.URL)
+		server.SetAliveStatus(status)
 
-		if err != nil {
-			server.SetAliveStatus(false)
-			log.Printf(err.Error())
+		if !status {
 			log.Printf("SERVER CONNECTION REFUSED: %s\n", server.URL)
 		} else {
-			server.SetAliveStatus(true)
-			log.Printf("SERVER: %s is OK - %d\n", server.URL, resp.StatusCode)
+			log.Printf("SERVER: %s is OK\n", server.URL)
 		}
 	}
 }
 
 func (sp *ServerPool) AddServer(server *Server) {
 	sp.Servers = append(sp.Servers, server)
+}
+
+func (s *ServerPool) MarkBackendStatus(backendUrl *url.URL, alive bool) {
+	for _, b := range s.Servers {
+		if b.URL == backendUrl.String() {
+			b.SetAliveStatus(alive)
+			break
+		}
+	}
 }

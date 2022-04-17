@@ -9,7 +9,7 @@ import (
 
 func DoHealthCheck() {
 	for {
-		countdown := time.NewTicker(2 * time.Minute)
+		countdown := time.NewTicker(time.Minute)
 		select {
 		case <-countdown.C:
 			log.Println("Started Health Check")
@@ -27,7 +27,6 @@ func CreateServerPool() {
 			ReverseProxy: server.ReverseProxy,
 			IsAlive:      server.IsAlive,
 		})
-		//log.Printf("%s %q", server.URL, serverPool.Servers)
 	}
 	config.ServerPool.DoHealthCheck()
 }
