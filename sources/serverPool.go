@@ -46,8 +46,8 @@ func (sp *ServerPool) AddServer(server *Server) {
 	sp.Servers = append(sp.Servers, server)
 }
 
-func (s *ServerPool) MarkBackendStatus(backendUrl *url.URL, alive bool) {
-	for _, b := range s.Servers {
+func (sp *ServerPool) MarkBackendStatus(backendUrl *url.URL, alive bool) {
+	for _, b := range sp.Servers {
 		if b.URL == backendUrl.String() {
 			b.SetAliveStatus(alive)
 			break
