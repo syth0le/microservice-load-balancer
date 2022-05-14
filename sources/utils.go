@@ -1,7 +1,6 @@
-package utils
+package sources
 
 import (
-	"github.com/syth0le/microservice-load-balancer/sources/structures"
 	"log"
 	"time"
 )
@@ -12,20 +11,20 @@ func DoHealthCheck() {
 		select {
 		case <-countdown.C:
 			log.Println("Started Health Check")
-			structures.ServPool.DoHealthCheck()
+			ServPool.DoHealthCheck()
 			log.Println("Finished Health Check")
 		}
 	}
 }
 
 func CreateServerPool() {
-	for _, server := range structures.Cfg.Servers {
+	for _, server := range Cfg.Servers {
 		server.AddReverseProxy()
-		structures.ServPool.AddServer(&structures.Server{
+		ServPool.AddServer(&Server{
 			URL:          server.URL,
 			ReverseProxy: server.ReverseProxy,
 			IsAlive:      server.IsAlive,
 		})
 	}
-	structures.ServPool.DoHealthCheck()
+	ServPool.DoHealthCheck()
 }

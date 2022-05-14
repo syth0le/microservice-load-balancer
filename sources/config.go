@@ -1,4 +1,4 @@
-package structures
+package sources
 
 type Config struct {
 	ProxyPort string   `json:"proxy_port"`
